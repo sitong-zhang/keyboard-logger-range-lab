@@ -20,7 +20,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:en:xliff:document:1.2">
     <!-- Input Method Platform Tittle  -->
-    <string name="trime_app_name">Keytrace</string>
+    <string name="trime_app_name">键迹</string>
     <!-- Preference settings -->
     <string name="settings__help_title">Help</string>
     <string name="pref_wiki">Wiki</string>
@@ -245,5 +245,6 @@
     <string name="event_started">记录服务已开启</string>
     <string name="event_interrupted">记录中断</string>
     <string name="event_stopped">记录已停止</string>
-    <string name="logs_title">键盘记录（仅本机）</string>
+    <string name="logs_title">字迹</string>
+    <string name="crash_title">崩溃日志</string>
 </resources>

@@ -36,7 +36,7 @@ public class LogsActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("键盘记录（仅本机）");
+        title.setText("字迹");
         title.setTextSize(20);
         title.setGravity(Gravity.CENTER);
         root.addView(title);
@@ -75,6 +75,15 @@ public class LogsActivity extends Activity {
             }
         });
 
+        Button crash = new Button(this);
+        crash.setText("崩溃日志");
+        crash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new android.content.Intent(LogsActivity.this, CrashActivity.class));
+            }
+        });
+
         Button close = new Button(this);
         close.setText("关闭");
         close.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +95,7 @@ public class LogsActivity extends Activity {
 
         buttons.addView(export);
         buttons.addView(clear);
+        buttons.addView(crash);
         buttons.addView(close);
         root.addView(buttons);
 
