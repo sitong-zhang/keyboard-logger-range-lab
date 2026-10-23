@@ -1,0 +1,14 @@
+# Gradle / Android 构建缓存
+.gradle/
+app/build/
+build/
+local.properties
+
+# 操作系统 / 编辑器
+.DS_Store
+*.iml
+.idea/
+*.swp
+
+# 已签名产物（按需保留，默认不纳入版本控制）
+*.apk

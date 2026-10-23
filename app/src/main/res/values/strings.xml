@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">靶场键盘记录器(授权测试)</string>
+    <string name="service_description">授权安全测试用的本机键盘记录服务。仅记录本设备输入并保存在本机，不上传任何服务器。仅可在你本人设备或已获书面授权的靶场环境中使用。</string>
+
+    <string name="legal_declaration">
+⚠️ 合法使用声明（务必阅读）
+
+本应用仅限在以下情形使用：
+✔ 记录【你本人】设备的键盘输入，用于安全研究 / 自查；
+✔ 在【已获书面授权】的封闭靶场环境中使用。
+
+严禁用于以下行为（可能触犯法律）：
+✘ 在他人设备 / 账户上秘密安装或运行；
+✘ 未经同意窃取任何人的密码、聊天内容或其他隐私；
+✘ 任何违反《网络安全法》《刑法》第285条等规定的用途。
+
+使用者须自行承担一切因不当使用产生的法律责任。
+所有记录仅保存在本机，应用不申请任何网络权限。
+    </string>
+
+    <string name="btn_enable">前往开启键盘记录服务</string>
+    <string name="btn_view">刷新查看本地日志</string>
+    <string name="btn_export">导出日志到本机存储</string>
+    <string name="btn_clear">清空日志</string>
+    <string name="cb_agree">我已确认：本设备为我所有，或已获合法授权用于安全测试</string>
+    <string name="tv_status_hint">状态：请在上方勾选确认后，点击“前往开启”并在系统设置中开启本服务</string>
+</resources>
