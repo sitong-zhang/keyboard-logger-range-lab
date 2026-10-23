@@ -15,5 +15,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KeyLoggerLab"
+rootProject.name = "Keytrace"
 include(":app")
