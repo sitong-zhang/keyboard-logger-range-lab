@@ -1,48 +1,53 @@
 <resources>
     <string name="app_name">Keytrace</string>
 
-    <string name="service_description">Keytrace records keystrokes on this device so you can review them later. Everything stays on your phone.</string>
+    <string name="service_description">Keytrace 会记录本机上的按键输入，方便你事后查看。所有数据仅保存在这台手机上。</string>
 
     <!-- Dashboard -->
-    <string name="status_running">Recording</string>
-    <string name="status_stopped">Paused</string>
-    <string name="status_running_sub">Capturing input across apps</string>
-    <string name="status_stopped_sub">Service isn\'t running yet</string>
-    <string name="btn_enable">Enable service</string>
-    <string name="btn_disable_hint">Open settings to stop</string>
-    <string name="btn_open_logs">Open logs</string>
+    <string name="status_running">记录中</string>
+    <string name="status_stopped">已暂停</string>
+    <string name="status_running_sub">正在捕获各应用的输入内容</string>
+    <string name="status_stopped_sub">服务尚未开启</string>
+    <string name="btn_enable">开启服务</string>
+    <string name="btn_disable_hint">前往设置关闭</string>
+    <string name="btn_open_logs">查看记录</string>
 
-    <string name="stat_keystrokes">Keystrokes</string>
-    <string name="stat_apps">Apps</string>
-    <string name="stat_since">Since</string>
+    <string name="stat_keystrokes">按键数</string>
+    <string name="stat_apps">应用数</string>
+    <string name="stat_since">起始时间</string>
 
-    <string name="recent_title">Recent activity</string>
-    <string name="recent_empty">Nothing captured yet. Enable the service and start typing in any app.</string>
+    <string name="recent_title">最近活动</string>
+    <string name="recent_empty">还没有记录。开启服务后，在任意应用里输入文字即可开始。</string>
 
     <!-- Logs -->
-    <string name="title_logs">Logs</string>
-    <string name="search_hint">Search text or app</string>
-    <string name="empty_logs">No entries match your search.</string>
-    <string name="menu_export">Export</string>
-    <string name="menu_clear">Clear</string>
-    <string name="clear_confirm_title">Clear all logs?</string>
-    <string name="clear_confirm_msg">This permanently deletes every recorded entry on this device.</string>
-    <string name="cancel">Cancel</string>
-    <string name="clear">Clear</string>
-    <string name="exported_toast">Exported to:\n%s</string>
+    <string name="title_logs">记录</string>
+    <string name="search_hint">搜索内容或应用</string>
+    <string name="empty_logs">没有匹配的记录。</string>
+    <string name="menu_export">导出</string>
+    <string name="menu_clear">清空</string>
+    <string name="clear_confirm_title">清空所有记录？</string>
+    <string name="clear_confirm_msg">将永久删除本机上已记录的全部条目。</string>
+    <string name="cancel">取消</string>
+    <string name="clear">清空</string>
+    <string name="exported_toast">已导出到：\n%s</string>
 
     <!-- Settings -->
-    <string name="title_settings">Settings</string>
-    <string name="row_service">Recording service</string>
-    <string name="row_service_summary">Required to capture keystrokes</string>
-    <string name="row_export">Export logs</string>
-    <string name="row_export_summary">Copy to this app\'s folder</string>
-    <string name="row_clear">Clear logs</string>
-    <string name="row_clear_summary">Delete all recorded entries</string>
-    <string name="row_about">About</string>
-    <string name="about_text">Keytrace keeps a local record of what you type on this device. It has no internet access, so your data never leaves the phone. Use it only on devices you own or are authorized to test.</string>
+    <string name="title_settings">设置</string>
+    <string name="row_service">记录服务</string>
+    <string name="row_service_summary">捕获按键输入所必需</string>
+    <string name="row_export">导出记录</string>
+    <string name="row_export_summary">保存到本应用目录</string>
+    <string name="row_clear">清空记录</string>
+    <string name="row_clear_summary">删除所有已记录条目</string>
+    <string name="row_about">关于</string>
+    <string name="about_text">Keytrace 在本机上记录你输入的文字。它没有联网权限，数据不会离开这台手机。请仅在你拥有或获授权测试的设备上使用。</string>
+
+    <!-- Service events -->
+    <string name="event_started">开始记录</string>
+    <string name="event_interrupted">记录中断</string>
+    <string name="event_stopped">记录已停止</string>
 
     <!-- Misc -->
-    <string name="toast_service_enabled">Service already enabled</string>
-    <string name="open_settings">Open accessibility settings</string>
+    <string name="toast_service_enabled">服务已开启</string>
+    <string name="open_settings">前往无障碍设置</string>
 </resources>

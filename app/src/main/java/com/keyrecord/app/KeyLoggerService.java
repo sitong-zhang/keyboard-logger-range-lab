@@ -16,7 +16,7 @@ public class KeyLoggerService extends AccessibilityService {
     public void onServiceConnected() {
         super.onServiceConnected();
         logManager = LogManager.getInstance(this);
-        logManager.appendEvent("Recording started");
+        logManager.appendEvent(getString(R.string.event_started));
     }
 
     @Override
@@ -44,14 +44,14 @@ public class KeyLoggerService extends AccessibilityService {
     @Override
     public void onInterrupt() {
         if (logManager != null) {
-            logManager.appendEvent("Recording interrupted");
+            logManager.appendEvent(getString(R.string.event_interrupted));
         }
     }
 
     @Override
     public void onDestroy() {
         if (logManager != null) {
-            logManager.appendEvent("Recording stopped");
+            logManager.appendEvent(getString(R.string.event_stopped));
         }
         super.onDestroy();
     }

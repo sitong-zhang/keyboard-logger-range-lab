@@ -7,9 +7,43 @@ the phone.
 
 > Use only on devices you own or are authorized to test.
 
+## Release information
+
+This section is updated with every release. The table always reflects the
+latest published version.
+
+| | |
+|---|---|
+| Latest release | **v1.1** ([download](../../releases/latest)) |
+| Version name | 1.1 |
+| Version code | 2 |
+| Package | `com.keyrecord.app` |
+| Release date | 2026-10-23 |
+| APK | `app-release.apk` (~4.7 MB) |
+| Min / target SDK | 24 / 36 |
+| Permissions | none (except an AndroidX-generated local broadcast permission) |
+
+### Changelog
+
+**v1.1** (2026-10-23)
+
+- Localized the entire app UI to Simplified Chinese (app name stays "Keytrace")
+- Service lifecycle events (started / interrupted / stopped) are now recorded
+  in Chinese as well
+- Replaced all hand-drawn icons with official Material Icons from
+  [google/material-design-icons](https://github.com/google/material-design-icons)
+  (50k+ stars), including a new launcher icon
+- Added icons to dashboard stat cards, recent-activity header, and menus
+
+**v1.0** (2026-10-23)
+
+- Initial release: Material 3 dashboard, logs with search/export, settings
+- Accessibility-based capture, local-only storage, no network permission
+
 ## Highlights
 
 - **Material 3 UI** with dynamic color (Android 12+) and light/dark themes
+- **Simplified Chinese interface** across dashboard, logs, and settings
 - **Dashboard** with live status, keystroke/app counters, and recent activity
 - **Logs** screen with search and export
 - **No root**, no network access — all data stays in app-private storage
@@ -24,6 +58,7 @@ the phone.
 | minSdk | 24 (Android 7.0+) |
 | Gradle | 8.14.6 |
 | UI | Material Components for Android, RecyclerView |
+| Icons | [Material Icons](https://github.com/google/material-design-icons) |
 
 ## Build
 
@@ -35,6 +70,8 @@ export ANDROID_HOME=/path/to/android-sdk
 
 ## Usage
 
-1. Install `app-release.apk`.
-2. Open Keytrace → **Enable service** → turn it on in Accessibility settings.
-3. Type in any app; entries show up in **Logs**. Export / clear from the menu.
+1. Install `app-release.apk` from the [latest release](../../releases/latest).
+2. Open Keytrace → **开启服务** (Enable service) → turn it on in Accessibility
+   settings.
+3. Type in any app; entries show up in **记录** (Logs). Export / clear from the
+   menu.
