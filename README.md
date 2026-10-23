@@ -14,18 +14,33 @@ latest published version.
 
 | | |
 |---|---|
-| Latest release | **v1.4** ([download](../../releases/latest)) |
-| Version name | 1.4 |
-| Version code | 5 |
+| Latest release | **v1.5** ([download](../../releases/latest)) |
+| Version name | 1.5 |
+| Version code | 6 |
 | Package | `com.keyrecord.app` |
 | Release date | 2026-10-23 |
-| APK | `app-release.apk` (~5.0 MB) |
+| APK | `app-release.apk` (~7.2 MB) |
 | Min / target SDK | 24 / 36 |
-| Permissions | none (except an AndroidX-generated local broadcast permission) |
+| Permissions | `RECORD_AUDIO` (keyboard dictation only) + an AndroidX-generated local broadcast permission. **No `INTERNET` permission.** |
 
 ### Changelog
 
-**v1.4** (2026-10-23)
+**v1.5** (2026-10-23)
+
+- **Pixel-accurate iOS keyboard replica** — rebuilt the built-in keyboard to match
+  Apple's system keyboard using reverse-engineered iOS geometry (key height/width,
+  gap, corner radius and special-key width ratios), the iconic iOS palette
+  (light-gray keys, darker special keys, blue accent, wide space bar), and the
+  exact bottom row: globe · 123 · space · mic · return.
+- **Much better Chinese pinyin** — the offline engine now uses the
+  [rime-ice](https://github.com/iDvel/rime-ice) (GPL-3.0) phrase dictionaries
+  plus pypinyin, with a curated essential-words seed. The candidate bar does
+  **prefix associate**: typing `ni` already suggests `你好 / 你们 / 你的 …`;
+  `nihao → 你好`, `women → 我们`, `beijing → 北京 背景 北境 …`.
+- **Voice input** — the microphone key triggers on-device / system speech
+  dictation (no `INTERNET` permission is declared; recognition is delegated to the
+  system speech service, which needs `RECORD_AUDIO` and is requested on first use).
+- Same local-only, real-time recording as before.
 
 - **Chinese pinyin input** — the built-in keyboard now handles 中文拼音 with a
   real offline engine (dictionaries derived from the pypinyin data plus a corpus

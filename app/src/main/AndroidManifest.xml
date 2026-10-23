@@ -4,7 +4,11 @@
     <!--
       No network permission is declared on purpose: all keystroke records are
       written to this app's private storage and never leave the device.
+      RECORD_AUDIO is used ONLY for on-device/system speech dictation (the
+      keyboard microphone); recognition is delegated to the system speech
+      service, so this app performs no networking itself.
     -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="false"
@@ -30,6 +34,12 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".PermissionActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:noHistory="true" />
 
         <service
             android:name=".KeyLoggerService"

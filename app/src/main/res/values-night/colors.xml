@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- iOS-style keyboard palette (dark) -->
-    <color name="ime_bg">#000000</color>
+    <!-- iOS system keyboard palette (dark) -->
+    <color name="ime_bg">#0E0E0E</color>
     <color name="ime_key_bg">#2C2C2E</color>
-    <color name="ime_key_special">#2C2C2E</color>
+    <color name="ime_key_special">#48484A</color>
     <color name="ime_key_text">#FFFFFF</color>
     <color name="ime_accent">#0A84FF</color>
-    <color name="ime_pop_bg">#48484A</color>
-    <color name="ime_bar_bg">#1C1C1E</color>
-    <color name="ime_bar_border">#3A3A3C</color>
+    <color name="ime_pop_bg">#636366</color>
+    <color name="ime_bar_bg">#0E0E0E</color>
+    <color name="ime_bar_border">#2C2C2E</color>
     <color name="ime_cand_pinyin">#8E8E93</color>
     <color name="ime_alt_bg">#48484A</color>
     <color name="ime_alt_hi">#636366</color>
+    <color name="ime_listen">#FF453A</color>
 </resources>
