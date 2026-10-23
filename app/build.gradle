@@ -9,8 +9,8 @@ android {
         applicationId "com.keyrecord.app"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 20000
-        versionName "2.0"
+        versionCode 20211024
+        versionName "2.1"
         setProperty("archivesBaseName", "trime-$versionName")
         resValue "string", "trime_url", getGitUrl()
         buildConfigField 'String', 'BUILD_INFO' , '"' + getBuildInfo() + '"'

@@ -108,10 +108,20 @@ public class LogsActivity extends Activity {
             sb.append("起始时间：").append(fmt.format(new Date(s.since))).append("\n");
         }
         sb.append("————————————————\n");
+        sb.append("涉及应用列表（按次数）：\n");
+        if (s.topApps.isEmpty()) {
+            sb.append("（暂无）\n");
+        } else {
+            for (LogManager.AppStat a : s.topApps) {
+                sb.append("  · ").append(a.pkg).append("  (").append(a.count).append(")\n");
+            }
+        }
+        sb.append("————————————————\n");
         List<LogManager.LogEntry> recent = lm.getRecent(200);
         if (recent.isEmpty()) {
-            sb.append("（暂无记录。请先在系统设置里开启本服务的无障碍权限，并用本输入法打字。）\n");
+            sb.append("（暂无打字记录。请先在系统设置→无障碍开启本服务的记录权限，并切换使用本输入法打字。）\n");
         } else {
+            sb.append("最近打字记录：\n");
             for (LogManager.LogEntry e : recent) {
                 sb.append(fmt.format(new Date(e.time))).append("  ")
                         .append(e.pkg).append("\n    ")

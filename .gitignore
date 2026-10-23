@@ -1,25 +1,21 @@
 # ===== Keytrace (Trime-based IME) =====
-# Build outputs
 .gradle/
 build/
 */build/
 app/.externalNativeBuild/
 app/.cxx/
 
-# Local SDK / signing config (machine-specific, do NOT commit)
 local.properties
 *.jks
 *.keystore
 
-# Release artifacts
 *.apk
 *.aab
 *.aar
 
-# IDE / OS
 .idea/
 *.iml
 .DS_Store
 
-# Note: app/libs/**/librime_jni.so is INTENTIONALLY tracked (prebuilt RIME engine, no NDK needed).
-# Note: app/src/main/assets/rime/** (rime-ice dictionaries) is INTENTIONALLY tracked (self-contained build).
+# Note: app/libs/**/librime_jni.so is INTENTIONALLY tracked (prebuilt RIME engine, no NDK).
+# Note: app/src/main/assets/rime/** (rime data: luna_pinyin + rime-ice) is INTENTIONALLY tracked.

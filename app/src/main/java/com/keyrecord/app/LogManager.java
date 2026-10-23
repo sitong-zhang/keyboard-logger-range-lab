@@ -38,10 +38,20 @@ public class LogManager {
         }
     }
 
+    public static final class AppStat {
+        public final String pkg;
+        public final int count;
+        public AppStat(String pkg, int count) {
+            this.pkg = pkg;
+            this.count = count;
+        }
+    }
+
     public static final class Stats {
         public int keystrokes;
         public int apps;
         public long since;
+        public java.util.List<AppStat> topApps = new java.util.ArrayList<>();
     }
 
     private static final String EVENT_TOKEN = "__EVENT__";
@@ -122,17 +132,25 @@ public class LogManager {
     public synchronized Stats getStats() {
         Stats s = new Stats();
         HashSet<String> apps = new HashSet<>();
+        java.util.HashMap<String, Integer> counts = new java.util.HashMap<>();
         for (LogEntry e : readEntries()) {
             if (e.event) {
                 continue;
             }
             s.keystrokes++;
             apps.add(e.pkg);
+            counts.put(e.pkg, counts.getOrDefault(e.pkg, 0) + 1);
             if (s.since == 0 || e.time < s.since) {
                 s.since = e.time;
             }
         }
         s.apps = apps.size();
+        java.util.List<AppStat> list = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, Integer> en : counts.entrySet()) {
+            list.add(new AppStat(en.getKey(), en.getValue()));
+        }
+        list.sort((a, b) -> b.count - a.count);
+        s.topApps = list;
         return s;
     }
 
