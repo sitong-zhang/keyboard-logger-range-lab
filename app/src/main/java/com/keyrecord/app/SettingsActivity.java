@@ -33,9 +33,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         configureRow(R.id.rowService, R.drawable.ic_keyboard, R.string.row_service,
                 R.string.row_service_summary, true);
-        configureRow(R.id.rowExport, R.drawable.ic_export, R.string.row_export,
+        configureRow(R.id.rowExport, R.drawable.ic_share, R.string.row_export,
                 R.string.row_export_summary, false);
-        configureRow(R.id.rowClear, R.drawable.ic_trash, R.string.row_clear,
+        configureRow(R.id.rowClear, R.drawable.ic_delete, R.string.row_clear,
                 R.string.row_clear_summary, false);
         configureRow(R.id.rowAbout, R.drawable.ic_info, R.string.row_about,
                 R.string.about_text, false);

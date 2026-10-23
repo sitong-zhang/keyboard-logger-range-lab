@@ -1,4 +1,4 @@
-// 顶层构建脚本：仅声明 Android Gradle Plugin 版本，不引入任何第三方/网络依赖。
+// Top-level build script: only declares the Android Gradle Plugin version.
 plugins {
     id 'com.android.application' version '8.13.2' apply false
 }

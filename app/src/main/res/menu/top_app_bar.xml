@@ -3,10 +3,11 @@
     <item
         android:id="@+id/menu_settings"
         android:title="@string/title_settings"
-        android:icon="@android:drawable/ic_menu_preferences"
+        android:icon="@drawable/ic_settings"
         android:showAsAction="never" />
     <item
         android:id="@+id/menu_about"
         android:title="@string/row_about"
+        android:icon="@drawable/ic_info"
         android:showAsAction="never" />
 </menu>
