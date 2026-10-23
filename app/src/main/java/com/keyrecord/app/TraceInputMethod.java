@@ -1,40 +1,47 @@
 package com.keyrecord.app;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Locale;
 
 /**
- * Built-in keyboard (InputMethodService). Every key the user types is
- * captured and written locally via LogManager at the moment it is committed,
- * which is far more reliable and real-time than the accessibility route
- * (it also works in floating windows / split screen).
+ * Built-in keyboard inspired by the iOS system keyboard: rounded gray keys,
+ * a long space bar, a globe / 123 / comma / space / period / return bar,
+ * shift capitalization, and an iOS-style key-pop animation. Every key is
+ * captured and written locally via LogManager at commit time (real-time,
+ * works in floating windows / split screen).
  */
 public class TraceInputMethod extends InputMethodService {
 
     private static final long WORD_FLUSH_DELAY_MS = 900;
+    private static final int LETTERS = 0;
+    private static final int NUMBERS = 1;
+    private static final int SYMBOLS = 2;
 
     private LogManager logManager;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
+    private FrameLayout root;
     private LinearLayout keyboardView;
-    private boolean shifted = false;
-    private boolean symbols = false;
+    private TextView popup;
+
+    private int page = LETTERS;
+    private int shiftState = 0; // 0 off, 1 one-shot, 2 caps lock
 
     private final StringBuilder wordBuffer = new StringBuilder();
     private final Runnable flushRunnable = this::flushWord;
@@ -47,13 +54,27 @@ public class TraceInputMethod extends InputMethodService {
 
     @Override
     public View onCreateInputView() {
+        root = new FrameLayout(this);
+        root.setBackgroundColor(color(R.color.ime_bg));
+
         keyboardView = new LinearLayout(this);
         keyboardView.setOrientation(LinearLayout.VERTICAL);
-        keyboardView.setBackgroundColor(color(R.color.ime_bg));
-        int pad = dp(6);
-        keyboardView.setPadding(pad, dp(8), pad, dp(10));
+        keyboardView.setPadding(dp(4), dp(8), dp(4), dp(8));
+        root.addView(keyboardView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        popup = new TextView(this);
+        popup.setTextSize(32);
+        popup.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        popup.setTextColor(color(R.color.ime_key_text));
+        popup.setBackground(rounded(R.color.ime_pop_bg, 10));
+        popup.setPadding(dp(14), dp(6), dp(14), dp(6));
+        popup.setVisibility(View.GONE);
+        root.addView(popup, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         rebuild();
-        return keyboardView;
+        return root;
     }
 
     @Override
@@ -62,76 +83,97 @@ public class TraceInputMethod extends InputMethodService {
         super.onFinishInputView(finishingInput);
     }
 
-    // ------------------------------------------------------------------ build
+    // --------------------------------------------------------------- build UI
 
     private void rebuild() {
+        if (popup != null) {
+            popup.setVisibility(View.GONE);
+        }
         keyboardView.removeAllViews();
-        if (symbols) {
-            addRow("1234567890", 1f, false);
-            addRow("@#$%&-+()", 1f, false);
-            addRow("=\"*':;!?", 1f, false);
-        } else {
-            addRow("qwertyuiop", 1f, false);
-            addRow("asdfghjkl", 1f, false);
+
+        if (page == LETTERS) {
+            addRow("qwertyuiop", 1f);
+            addInsetRow("asdfghjkl", 1f);
             addSideRow("zxcvbnm");
+        } else if (page == NUMBERS) {
+            addRow("1234567890", 1f);
+            addRow("-/:;()$&@\".", 1f);
+            addSideRow("*+\"'%,?!#+=");
+        } else {
+            addRow("[]{}#%^*+=", 1f);
+            addRow("_\\|~<>¥€£•", 1f);
+            addSideRow("§©®™°¶…123");
         }
         addBottomRow();
     }
 
-    private void addRow(String keys, float keyWeight, boolean narrow) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(46));
-        rowLp.topMargin = dp(4);
+    private void addRow(String keys, float weight) {
+        LinearLayout row = newRow();
         for (int i = 0; i < keys.length(); i++) {
-            row.addView(makeKey(String.valueOf(keys.charAt(i)), keyWeight, false));
+            row.addView(makeKey(String.valueOf(keys.charAt(i)), weight, false));
         }
-        keyboardView.addView(row, rowLp);
+        keyboardView.addView(row);
     }
 
-    /** Letter third row: [shift] z..m [backspace]. */
+    private void addInsetRow(String keys, float weight) {
+        LinearLayout row = newRow();
+        row.setPadding(dp(16), 0, dp(16), 0);
+        for (int i = 0; i < keys.length(); i++) {
+            row.addView(makeKey(String.valueOf(keys.charAt(i)), weight, false));
+        }
+        keyboardView.addView(row);
+    }
+
+    /** Third row: [shift] keys... [delete]. */
     private void addSideRow(String keys) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(46));
-        rowLp.topMargin = dp(4);
-        row.addView(makeKey("\u21E7", 1.5f, true)); // shift
+        LinearLayout row = newRow();
+        row.addView(makeKey("\u21E7", 1.4f, true));
         for (int i = 0; i < keys.length(); i++) {
             row.addView(makeKey(String.valueOf(keys.charAt(i)), 1f, false));
         }
-        row.addView(makeKey("\u232B", 1.5f, true)); // backspace
-        keyboardView.addView(row, rowLp);
+        row.addView(makeKey("\u232B", 1.4f, true));
+        keyboardView.addView(row);
     }
 
     private void addBottomRow() {
+        LinearLayout row = newRow();
+        row.addView(makeKey("\uD83C\uDF10", 1.2f, true));          // globe / switch
+        row.addView(makeKey(page == LETTERS ? "123" : "ABC", 1.5f, true));
+        row.addView(makeKey(",", 1f, false));
+        row.addView(makeKey(getString(R.string.ime_space), 4f, false));
+        row.addView(makeKey(".", 1f, false));
+        row.addView(makeKey("\u21B5", 1.5f, true, true));          // return (accent)
+        keyboardView.addView(row);
+    }
+
+    private LinearLayout newRow() {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(46));
-        rowLp.topMargin = dp(4);
-
-        row.addView(makeKey(symbols ? "ABC" : "\uFF1F123", 1.5f, true)); // page toggle
-        row.addView(makeKey(",", 1f, false));
-        row.addView(makeKey(getString(R.string.ime_space), 4f, false)); // space
-        row.addView(makeKey(".", 1f, false));
-        row.addView(makeKey(getString(R.string.ime_switch), 1.5f, true)); // switch IME
-        row.addView(makeKey("\u21B5", 1.5f, true)); // enter
-        keyboardView.addView(row, rowLp);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(44));
+        lp.topMargin = dp(5);
+        row.setLayoutParams(lp);
+        return row;
     }
 
     private TextView makeKey(String label, float weight, boolean special) {
+        return makeKey(label, weight, special, false);
+    }
+
+    private TextView makeKey(String label, float weight, boolean special, boolean accent) {
+        final String shown = (shiftState != 0 && !special && label.length() == 1)
+                ? label.toUpperCase(Locale.ROOT) : label;
         final TextView key = new TextView(this);
-        key.setText(shifted && !symbols ? label.toUpperCase(Locale.ROOT) : label);
+        key.setText(shown);
         key.setGravity(Gravity.CENTER);
         key.setMaxLines(1);
-        key.setTextSize(special || label.length() > 2 ? 14 : 18);
-        key.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        key.setTextColor(color(R.color.ime_key_text));
-        key.setBackground(special
-                ? rounded(R.color.ime_key_special, 10)
-                : rounded(R.color.ime_key_bg, 10));
+        key.setTextSize(special || label.length() > 2 ? 14 : 20);
+        key.setTypeface(Typeface.DEFAULT, special && label.length() <= 2
+                ? Typeface.NORMAL : Typeface.BOLD);
+        key.setTextColor(accent ? 0xFFFFFFFF : color(R.color.ime_key_text));
+        key.setBackground(accent
+                ? rounded(R.color.ime_accent, 7)
+                : rounded(special ? R.color.ime_key_special : R.color.ime_key_bg, 7));
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 0, ViewGroup.LayoutParams.MATCH_PARENT, weight);
@@ -139,35 +181,42 @@ public class TraceInputMethod extends InputMethodService {
         lp.rightMargin = dp(3);
         key.setLayoutParams(lp);
 
+        final boolean poppable = !special && !accent && label.length() == 1;
+        key.setOnTouchListener((v, e) -> {
+            if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                v.setAlpha(0.55f);
+                if (poppable) {
+                    showPop(shown, v);
+                }
+            } else if (e.getAction() == MotionEvent.ACTION_UP
+                    || e.getAction() == MotionEvent.ACTION_CANCEL) {
+                v.setAlpha(1f);
+            }
+            return false;
+        });
         key.setOnClickListener(v -> onKey(label));
         return key;
     }
 
-    // ------------------------------------------------------------------ input
+    // ----------------------------------------------------------------- input
 
     private void onKey(String label) {
-        switch (label) {
-            case "\u21E7": // shift
-                shifted = !shifted;
-                rebuild();
-                return;
-            case "\u232B": // backspace
-                handleBackspace();
-                return;
-            case "\u21B5": // enter
-                flushWord();
-                record("[\u21B5]");
-                commitText("\n");
-                return;
-            default:
-        }
-
-        if (label.equals("ABC") || label.equals("\uFF1F123")) { // page toggle
-            symbols = !symbols;
+        if ("\u21E7".equals(label)) { // shift
+            shiftState = (shiftState == 0) ? 1 : (shiftState == 1 ? 2 : 0);
             rebuild();
             return;
         }
-        if (label.equals(getString(R.string.ime_switch))) { // pick another IME
+        if ("\u232B".equals(label)) { // delete
+            handleBackspace();
+            return;
+        }
+        if ("\u21B5".equals(label)) { // return
+            flushWord();
+            record("[\u21B5]");
+            commitText("\n");
+            return;
+        }
+        if ("\uD83C\uDF10".equals(label)) { // globe -> switch IME
             flushWord();
             InputMethodManager imm =
                     (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -176,19 +225,31 @@ public class TraceInputMethod extends InputMethodService {
             }
             return;
         }
-        if (label.equals(getString(R.string.ime_space))) {
+        if (label.equals("123") || label.equals("ABC")) { // page toggle
+            page = (page == LETTERS) ? NUMBERS : LETTERS;
+            rebuild();
+            return;
+        }
+        if (label.equals("#+=")) { // numbers <-> symbols
+            page = (page == NUMBERS) ? SYMBOLS : NUMBERS;
+            rebuild();
+            return;
+        }
+        if (label.equals(getString(R.string.ime_space))) { // space
             flushWord();
             commitText(" ");
             return;
         }
 
-        String out = (shifted && !symbols) ? label.toUpperCase(Locale.ROOT) : label;
+        String out = label;
+        if (shiftState != 0 && label.length() == 1) {
+            out = label.toUpperCase(Locale.ROOT);
+            if (shiftState == 1) {
+                shiftState = 0;
+            }
+        }
         wordBuffer.append(out);
         scheduleFlush();
-        if (shifted && !symbols) {
-            shifted = false;
-            rebuild();
-        }
     }
 
     private void handleBackspace() {
@@ -207,14 +268,13 @@ public class TraceInputMethod extends InputMethodService {
         }
     }
 
-    // ------------------------------------------------------- word aggregation
+    // --------------------------------------------------- word aggregation / log
 
     private void scheduleFlush() {
         handler.removeCallbacks(flushRunnable);
         handler.postDelayed(flushRunnable, WORD_FLUSH_DELAY_MS);
     }
 
-    /** Writes buffered consecutive characters as one readable entry. */
     private void flushWord() {
         handler.removeCallbacks(flushRunnable);
         if (wordBuffer.length() == 0) {
@@ -231,6 +291,36 @@ public class TraceInputMethod extends InputMethodService {
         String pkg = (info != null && info.packageName != null)
                 ? info.packageName : "unknown";
         logManager.appendEntry(pkg, text);
+    }
+
+    // ------------------------------------------------------------- iOS key pop
+
+    private void showPop(String text, View key) {
+        if (popup == null || root == null) {
+            return;
+        }
+        popup.setText(text);
+        popup.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        int[] r = new int[2];
+        int[] k = new int[2];
+        root.getLocationOnScreen(r);
+        key.getLocationOnScreen(k);
+        int cx = k[0] - r[0] + key.getWidth() / 2;
+        int top = k[1] - r[1];
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) popup.getLayoutParams();
+        lp.leftMargin = cx - popup.getMeasuredWidth() / 2;
+        lp.topMargin = top - popup.getMeasuredHeight() - dp(6);
+        popup.setLayoutParams(lp);
+        popup.setVisibility(View.VISIBLE);
+        popup.setAlpha(1f);
+        popup.setScaleX(1f);
+        popup.setScaleY(1f);
+        popup.animate()
+                .alpha(0f)
+                .setStartDelay(140)
+                .setDuration(120)
+                .withEndAction(() -> popup.setVisibility(View.GONE))
+                .start();
     }
 
     // ------------------------------------------------------------------ utils

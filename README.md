@@ -14,9 +14,9 @@ latest published version.
 
 | | |
 |---|---|
-| Latest release | **v1.2** ([download](../../releases/latest)) |
-| Version name | 1.2 |
-| Version code | 3 |
+| Latest release | **v1.3** ([download](../../releases/latest)) |
+| Version name | 1.3 |
+| Version code | 4 |
 | Package | `com.keyrecord.app` |
 | Release date | 2026-10-23 |
 | APK | `app-release.apk` (~4.7 MB) |
@@ -24,6 +24,15 @@ latest published version.
 | Permissions | none (except an AndroidX-generated local broadcast permission) |
 
 ### Changelog
+
+**v1.3** (2026-10-23)
+
+- **iOS-style keyboard** — rebuilt the built-in recording keyboard to match
+  Apple's system keyboard: rounded gray keys, a long space bar, a
+  globe / 123 / comma / space / period / return bottom bar, shift
+  capitalization (tap = one letter, double-tap = caps lock), 123 / #+=
+  number & symbol pages, and the iOS key-pop animation on press.
+- Same real-time local recording as before.
 
 **v1.2** (2026-10-23)
 

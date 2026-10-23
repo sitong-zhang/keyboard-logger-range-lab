@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ime_bg">#ECEAF4</color>
-    <color name="ime_key_bg">#FFFFFF</color>
-    <color name="ime_key_special">#DBD8EC</color>
-    <color name="ime_key_text">#1C1B22</color>
+    <!-- iOS-style keyboard palette (light) -->
+    <color name="ime_bg">#EFEFF4</color>
+    <color name="ime_key_bg">#D1D1D6</color>
+    <color name="ime_key_special">#D1D1D6</color>
+    <color name="ime_key_text">#000000</color>
+    <color name="ime_accent">#007AFF</color>
+    <color name="ime_pop_bg">#FFFFFF</color>
 </resources>
