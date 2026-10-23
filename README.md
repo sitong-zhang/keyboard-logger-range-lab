@@ -19,7 +19,7 @@ latest published version.
 | Version code | 6 |
 | Package | `com.keyrecord.app` |
 | Release date | 2026-10-23 |
-| APK | `app-release.apk` (~7.2 MB) |
+| APK | `app-release.apk` (~6.1 MB) |
 | Min / target SDK | 24 / 36 |
 | Permissions | `RECORD_AUDIO` (keyboard dictation only) + an AndroidX-generated local broadcast permission. **No `INTERNET` permission.** |
 
