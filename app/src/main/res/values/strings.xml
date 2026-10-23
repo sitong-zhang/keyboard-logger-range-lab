@@ -50,4 +50,14 @@
     <!-- Misc -->
     <string name="toast_service_enabled">服务已开启</string>
     <string name="open_settings">前往无障碍设置</string>
+
+    <!-- Built-in keyboard (IME) -->
+    <string name="ime_name">Keytrace 键盘</string>
+    <string name="ime_space">空格</string>
+    <string name="ime_switch">切换</string>
+    <string name="ime_card_title">键盘记录</string>
+    <string name="ime_on_using">已开启，正在实时记录键盘输入</string>
+    <string name="ime_on_idle">已开启，把输入法切换为 Keytrace 键盘即可实时记录</string>
+    <string name="ime_off">未开启，开启后可实时记录（支持小窗/分屏）</string>
+    <string name="btn_enable_ime">开启键盘</string>
 </resources>

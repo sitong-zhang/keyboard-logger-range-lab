@@ -1,5 +1,7 @@
 package com.keyrecord.app;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,6 +10,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -37,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvStatSince;
     private LinearLayout recentContainer;
     private TextView tvRecentEmpty;
+    private TextView tvImeSub;
+    private Button btnIme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +62,13 @@ public class MainActivity extends AppCompatActivity {
         tvStatSince = findViewById(R.id.tvStatSince);
         recentContainer = findViewById(R.id.recentContainer);
         tvRecentEmpty = findViewById(R.id.tvRecentEmpty);
+        tvImeSub = findViewById(R.id.tvImeSub);
+        btnIme = findViewById(R.id.btnIme);
 
         btnEnable.setOnClickListener(v ->
                 startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
+        btnIme.setOnClickListener(v ->
+                startActivity(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)));
 
         findViewById(R.id.btnOpenLogs).setOnClickListener(v ->
                 startActivity(new Intent(this, LogsActivity.class)));
@@ -100,12 +111,38 @@ public class MainActivity extends AppCompatActivity {
             btnEnable.setText(R.string.btn_enable);
         }
 
+        refreshImeState();
+
         LogManager.Stats stats = logManager.getStats();
         tvStatKeys.setText(String.valueOf(stats.keystrokes));
         tvStatApps.setText(String.valueOf(stats.apps));
         tvStatSince.setText(stats.since > 0 ? formatDate(stats.since) : "—");
 
         buildRecent();
+    }
+
+    private void refreshImeState() {
+        boolean imeEnabled = false;
+        InputMethodManager imm =
+                (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            for (InputMethodInfo info : imm.getEnabledInputMethodList()) {
+                if (getPackageName().equals(info.getPackageName())) {
+                    imeEnabled = true;
+                    break;
+                }
+            }
+        }
+        if (!imeEnabled) {
+            tvImeSub.setText(R.string.ime_off);
+            btnIme.setText(R.string.btn_enable_ime);
+            return;
+        }
+        String current = Settings.Secure.getString(
+                getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
+        boolean selected = current != null && current.startsWith(getPackageName() + "/");
+        tvImeSub.setText(selected ? R.string.ime_on_using : R.string.ime_on_idle);
+        btnIme.setText(selected ? R.string.btn_enable_ime : R.string.btn_enable_ime);
     }
 
     private void buildRecent() {
@@ -132,9 +169,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isServiceEnabled() {
-        String enabled = Settings.Secure.getString(
-                getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        return enabled != null && enabled.contains(getPackageName() + "/.KeyLoggerService");
+        AccessibilityManager am =
+                (AccessibilityManager) getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (am == null) {
+            return false;
+        }
+        for (AccessibilityServiceInfo info
+                : am.getEnabledAccessibilityServiceList(
+                        AccessibilityServiceInfo.FEEDBACK_ALL_MASK)) {
+            if (info.getResolveInfo() != null
+                    && getPackageName().equals(
+                            info.getResolveInfo().serviceInfo.packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void showAbout() {

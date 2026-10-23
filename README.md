@@ -1,9 +1,9 @@
 # Keytrace
 
 A local keystroke recorder for Android, built with Material 3. It captures text
-typed into any app through the Accessibility API and stores everything on the
-device. It requests **no network permission**, so recorded data never leaves
-the phone.
+typed into any app through the Accessibility API **and** a built-in keyboard
+(InputMethodService), and stores everything on the device. It requests
+**no network permission**, so recorded data never leaves the phone.
 
 > Use only on devices you own or are authorized to test.
 
@@ -14,9 +14,9 @@ latest published version.
 
 | | |
 |---|---|
-| Latest release | **v1.1** ([download](../../releases/latest)) |
-| Version name | 1.1 |
-| Version code | 2 |
+| Latest release | **v1.2** ([download](../../releases/latest)) |
+| Version name | 1.2 |
+| Version code | 3 |
 | Package | `com.keyrecord.app` |
 | Release date | 2026-10-23 |
 | APK | `app-release.apk` (~4.7 MB) |
@@ -24,6 +24,20 @@ latest published version.
 | Permissions | none (except an AndroidX-generated local broadcast permission) |
 
 ### Changelog
+
+**v1.2** (2026-10-23)
+
+- **New: built-in keyboard (Keytrace 键盘)** — an InputMethodService that
+  records keystrokes in real time as they are committed. It works everywhere,
+  including floating windows and split screen, where accessibility events can
+  be delayed or missing.
+- **Fixed: dashboard status** — the service state is now read via the official
+  `AccessibilityManager` API, so an enabled service no longer shows as
+  "paused" on some ROMs.
+- **New: keyboard status card** on the dashboard showing whether the keyboard
+  is enabled and currently selected, with a shortcut to input-method settings.
+- Word-level aggregation: consecutive keys are grouped into one readable
+  entry (space / enter / backspace flush the buffer).
 
 **v1.1** (2026-10-23)
 
@@ -71,7 +85,13 @@ export ANDROID_HOME=/path/to/android-sdk
 ## Usage
 
 1. Install `app-release.apk` from the [latest release](../../releases/latest).
+   > Note: every app update makes Android reset its Accessibility and
+   > input-method grants for that app — re-enable them once after installing.
 2. Open Keytrace → **开启服务** (Enable service) → turn it on in Accessibility
    settings.
-3. Type in any app; entries show up in **记录** (Logs). Export / clear from the
+3. For real-time capture, tap **开启键盘** (Enable keyboard) → enable
+   **Keytrace 键盘** in system input-method settings → switch your current
+   keyboard to it (use the 切换 key on the keyboard or the keyboard-switch
+   button in the navigation bar).
+4. Type in any app; entries show up in **记录** (Logs). Export / clear from the
    menu.

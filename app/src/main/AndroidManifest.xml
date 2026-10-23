@@ -43,5 +43,22 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+        <!--
+          Built-in keyboard: captures keystrokes in real time as they are
+          committed, including floating windows and split screen.
+        -->
+        <service
+            android:name=".TraceInputMethod"
+            android:label="@string/ime_name"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service>
+
     </application>
 </manifest>

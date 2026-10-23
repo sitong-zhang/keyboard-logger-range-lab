@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ime_bg">#1E1B26</color>
+    <color name="ime_key_bg">#2C2938</color>
+    <color name="ime_key_special">#3A3650</color>
+    <color name="ime_key_text">#E6E1E9</color>
+</resources>
