@@ -1,183 +1,123 @@
 package com.keyrecord.app;
 
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.text.method.ScrollingMovementMethod;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.appbar.MaterialToolbar;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LogsActivity extends AppCompatActivity {
+/**
+ * Minimal local viewer for recorded keystrokes. Read-only display of the
+ * private log file, with export and clear actions. No network access.
+ */
+public class LogsActivity extends Activity {
 
-    private LogManager logManager;
-    private List<LogManager.LogEntry> allEntries = new ArrayList<>();
-    private List<LogManager.LogEntry> shownEntries = new ArrayList<>();
-    private LogAdapter adapter;
-    private TextView tvEmpty;
-    private String query = "";
+    private final SimpleDateFormat fmt =
+            new SimpleDateFormat("MM-dd HH:mm:ss", Locale.getDefault());
+    private TextView body;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_logs);
-        logManager = LogManager.getInstance(this);
 
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        root.setPadding(pad, pad, pad, pad);
 
-        RecyclerView recycler = findViewById(R.id.recyclerView);
-        tvEmpty = findViewById(R.id.tvEmpty);
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new LogAdapter();
-        recycler.setAdapter(adapter);
-    }
+        TextView title = new TextView(this);
+        title.setText("键盘记录（仅本机）");
+        title.setTextSize(20);
+        title.setGravity(Gravity.CENTER);
+        root.addView(title);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.logs_menu, menu);
-        MenuItem searchItem = menu.findItem(R.id.menu_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(getString(R.string.search_hint));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        body = new TextView(this);
+        body.setTextSize(13);
+        body.setMovementMethod(new ScrollingMovementMethod());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f);
+        root.addView(body, lp);
+
+        LinearLayout buttons = new LinearLayout(this);
+        buttons.setOrientation(LinearLayout.HORIZONTAL);
+        buttons.setGravity(Gravity.CENTER);
+
+        Button export = new Button(this);
+        export.setText("导出");
+        export.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onQueryTextSubmit(String q) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String q) {
-                query = q == null ? "" : q.toLowerCase(Locale.getDefault());
-                applyFilter();
-                return true;
+            public void onClick(View v) {
+                java.io.File f = LogManager.getInstance(LogsActivity.this).export();
+                Toast.makeText(LogsActivity.this,
+                        "已导出：" + (f != null ? f.getAbsolutePath() : "失败"),
+                        Toast.LENGTH_LONG).show();
             }
         });
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            finish();
-            return true;
-        } else if (id == R.id.menu_export) {
-            java.io.File f = logManager.export();
-            Toast.makeText(this,
-                    getString(R.string.exported_toast, f.getAbsolutePath()), Toast.LENGTH_LONG).show();
-            return true;
-        } else if (id == R.id.menu_clear) {
-            confirmClear();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        Button clear = new Button(this);
+        clear.setText("清空");
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogManager.getInstance(LogsActivity.this).clear();
+                refresh();
+                Toast.makeText(LogsActivity.this, "已清空", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Button close = new Button(this);
+        close.setText("关闭");
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        buttons.addView(export);
+        buttons.addView(clear);
+        buttons.addView(close);
+        root.addView(buttons);
+
+        setContentView(root);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadEntries();
+        refresh();
     }
 
-    private void loadEntries() {
-        allEntries = logManager.readEntries();
-        Collections.reverse(allEntries); // newest first
-        applyFilter();
-    }
-
-    private void applyFilter() {
-        shownEntries.clear();
-        for (LogManager.LogEntry e : allEntries) {
-            if (e.event) {
-                continue;
-            }
-            if (query.isEmpty()) {
-                shownEntries.add(e);
-                continue;
-            }
-            String label = AppLabels.getLabel(this, e.pkg).toLowerCase(Locale.getDefault());
-            if (e.text.toLowerCase(Locale.getDefault()).contains(query)
-                    || label.contains(query)) {
-                shownEntries.add(e);
+    private void refresh() {
+        LogManager lm = LogManager.getInstance(this);
+        LogManager.Stats s = lm.getStats();
+        StringBuilder sb = new StringBuilder();
+        sb.append("按键记录：").append(s.keystrokes).append(" 次\n");
+        sb.append("涉及应用：").append(s.apps).append(" 个\n");
+        if (s.since > 0) {
+            sb.append("起始时间：").append(fmt.format(new Date(s.since))).append("\n");
+        }
+        sb.append("————————————————\n");
+        List<LogManager.LogEntry> recent = lm.getRecent(200);
+        if (recent.isEmpty()) {
+            sb.append("（暂无记录。请先在系统设置里开启本服务的无障碍权限，并用本输入法打字。）\n");
+        } else {
+            for (LogManager.LogEntry e : recent) {
+                sb.append(fmt.format(new Date(e.time))).append("  ")
+                        .append(e.pkg).append("\n    ")
+                        .append(e.text).append("\n");
             }
         }
-        adapter.notifyDataSetChanged();
-        tvEmpty.setVisibility(shownEntries.isEmpty() ? View.VISIBLE : View.GONE);
-    }
-
-    private void confirmClear() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.clear_confirm_title)
-                .setMessage(R.string.clear_confirm_msg)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.clear, (d, w) -> {
-                    logManager.clear();
-                    loadEntries();
-                    Toast.makeText(this, R.string.clear, Toast.LENGTH_SHORT).show();
-                })
-                .show();
-    }
-
-    private String formatTime(long millis) {
-        if (millis <= 0) {
-            return "";
-        }
-        return new SimpleDateFormat("MM/dd HH:mm", Locale.getDefault()).format(new Date(millis));
-    }
-
-    class LogAdapter extends RecyclerView.Adapter<LogAdapter.VH> {
-        class VH extends RecyclerView.ViewHolder {
-            final TextView tvApp;
-            final TextView tvTime;
-            final TextView tvSnippet;
-
-            VH(View v) {
-                super(v);
-                tvApp = v.findViewById(R.id.tvApp);
-                tvTime = v.findViewById(R.id.tvTime);
-                tvSnippet = v.findViewById(R.id.tvSnippet);
-            }
-        }
-
-        @Override
-        public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_entry, parent, false);
-            return new VH(v);
-        }
-
-        @Override
-        public void onBindViewHolder(VH h, int position) {
-            LogManager.LogEntry e = shownEntries.get(position);
-            h.tvApp.setText(AppLabels.getLabel(LogsActivity.this, e.pkg));
-            h.tvTime.setText(formatTime(e.time));
-            h.tvSnippet.setText(e.text);
-        }
-
-        @Override
-        public int getItemCount() {
-            return shownEntries.size();
-        }
+        body.setText(sb.toString());
     }
 }

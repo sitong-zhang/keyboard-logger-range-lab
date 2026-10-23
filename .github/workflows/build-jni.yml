@@ -1,0 +1,130 @@
+name: Build Jni
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'Build jni (librime_jni.so) from which repository'
+        required: false
+        default: 'https://github.com/osfans/trime.git'
+      branch:
+        description: 'Build jni (librime_jni.so) from which branch'
+        required: false
+        default: 'develop'
+      tag:
+        description: 'Build jni (librime_jni.so) from which tag'
+        required: false
+        default: ''
+      abi:
+        description: 'ABIs that Gradle should create librime_jni.so for'
+        required: false
+        default: windows
+        type: choice
+        options:
+          - 'arm64-v8a'
+          - 'armeabi-v7a'
+          - 'x86'
+          - 'x86_64'
+          - 'all'
+      build:
+        description: 'Build mode'
+        required: false
+        default: release
+        type: choice
+        options:
+          - 'debug'
+          - 'release'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout last commit
+      uses: actions/checkout@v3
+      if: (github.event.inputs.url == '')
+      with:
+        fetch-depth: 0
+
+    - name: Clone code frome url
+      if: (github.event.inputs.url != '')
+      run: |
+        echo $GITHUB_WORKSPACE
+        pwd
+        git clone ${{github.event.inputs.url}} -b ${{github.event.inputs.branch}} $GITHUB_WORKSPACE
+
+    - name: Checkout tag
+      if: (github.event.inputs.tag != '')
+      run: cd  $GITHUB_WORKSPACE ; git fetch ; git checkout  ${{github.event.inputs.tag}} 
+
+    - name: Apply ABI
+      if: (github.event.inputs.abi != 'all')
+      run: |
+        if [ -f "app/build.gradle" ]; then
+          sed -i s/.*arm64.*/\ \ \ \ \ \ \ \ \ \ \ \ include\ '"'${{github.event.inputs.abi}}'"'/g app/build.gradle 
+          echo find app/build.gradle
+        fi
+        if [ -f "app/build.gradle.kts" ]; then
+          sed -i s/.*arm64.*/\ \ \ \ \ \ \ \ \ \ \ \ include\('"'${{github.event.inputs.abi}}'"'\)/g app/build.gradle.kts
+          echo find app/build.gradle.kts
+        fi
+        
+    - name: Upload src artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: src
+        path: app
+        # keep 90 days
+        retention-days: 90
+
+    - name: Fetch submodules
+      if: ${{ !steps.jni-cache.outputs.cache-hit }}
+      run: |
+        git submodule update --init --recursive
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: "temurin"
+        java-version: 17
+        # will restore cache of dependencies and wrappers
+        cache: 'gradle'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v2
+
+    - name: make filelist
+      run: |
+        sudo apt-get install tree
+        cd app
+        tree -L 5 > filelist.txt
+        
+    - name: Build Trime (debug)
+      if: (github.event.inputs.build != 'release')
+      continue-on-error: true
+      run: make debug
+
+    - name: Build JNI (release)
+      if: (github.event.inputs.build == 'release')
+      continue-on-error: true
+      run: make release
+
+    - name: make filelist2
+      run: |
+        cd app
+        tree -L 3 > filelist2.txt
+        
+    - name: Upload filelist
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: filelist
+        path: app/filelist*
+
+    - name: Upload JNI
+      uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: Jni
+        path: app/build/intermediates/cmake/*/obj
+        # keep 90 days
+        retention-days: 90

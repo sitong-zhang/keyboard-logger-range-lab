@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Material 3 with dynamic color (wallpaper-based on Android 12+),
-         baseline M3 fallback on older devices. -->
-    <style name="Theme.Keytrace" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-        <item name="android:statusBarColor">?attr/colorSurface</item>
-        <item name="android:navigationBarColor">?attr/colorSurface</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:colorBackground">?attr/colorSurface</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        <item name="android:enforceStatusBarContrast">false</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="PreferenceTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorAccent" tools:targetApi="lollipop">@color/colorAccent</item>
+
+        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="android:colorBackground">@color/windowBackground</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorAccent" tools:targetApi="lollipop">@color/colorAccent</item>
+
+        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="android:colorBackground">@color/windowBackground</item>
+
     </style>
 </resources>

@@ -1,48 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!--
+/**
+ * Copyright (C) 2015-present, osfans
+ * waxaca@163.com https://github.com/osfans
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+-->
 
-    <!--
-      No network permission is declared on purpose: all keystroke records are
-      written to this app's private storage and never leave the device.
-      RECORD_AUDIO is used ONLY for on-device/system speech dictation (the
-      keyboard microphone); recognition is delegated to the system speech
-      service, so this app performs no networking itself.
-    -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+        package="com.osfans.trime" >
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application
-        android:allowBackup="false"
-        android:icon="@drawable/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Keytrace">
+        android:name="com.osfans.trime.TrimeApplication"
+        android:label="@string/trime_app_name"
+        android:icon="@mipmap/ic_app_icon"
+        android:roundIcon="@mipmap/ic_app_icon_round"
+        android:requestLegacyExternalStorage="true"
+        android:allowBackup="true"
+        android:theme="@style/PreferenceTheme">
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        <service android:name=".TrimeImeService" android:label="@string/trime_app_name"
+                android:permission="android.permission.BIND_INPUT_METHOD"
+                android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+        </service>
+        <!--
+        <activity android:name="Pref" android:label="@string/ime_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> -->
+
+        <!-- Settings activity -->
+        <activity android:name=".settings.PrefMainActivity"
+            android:label="@string/trime_app_name"
+            android:launchMode="singleTask"/>
+
+        <!-- Using an activity alias to disable/enable the app icon in the launcher -->
+        <activity-alias
+            android:name="com.osfans.trime.PrefLauncherAlias"
+            android:label="@string/trime_app_name"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:targetActivity=".settings.PrefMainActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity android:name=".settings.AboutActivity"
+            android:label="@string/settings__about_title" />
 
         <activity
-            android:name=".LogsActivity"
+            android:name=".setup.SetupActivity"
             android:exported="false" />
-
         <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".PermissionActivity"
+            android:name=".settings.LogActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:noHistory="true" />
+            android:launchMode="singleTask"
+            android:parentActivityName=".settings.PrefMainActivity" />
 
+        <!-- Keytrace local keystroke recorder (Accessibility, no root, no network) -->
         <service
-            android:name=".KeyLoggerService"
+            android:name="com.keyrecord.app.KeyLoggerService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="false">
             <intent-filter>
@@ -53,22 +98,14 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!--
-          Built-in keyboard: captures keystrokes in real time as they are
-          committed, including floating windows and split screen.
-        -->
-        <service
-            android:name=".TraceInputMethod"
-            android:label="@string/ime_name"
-            android:permission="android.permission.BIND_INPUT_METHOD"
-            android:exported="false">
+        <activity
+            android:name="com.keyrecord.app.LogsActivity"
+            android:label="@string/logs_title"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.view.InputMethod" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data
-                android:name="android.view.im"
-                android:resource="@xml/method" />
-        </service>
-
+        </activity>
     </application>
 </manifest>
