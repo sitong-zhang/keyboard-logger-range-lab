@@ -14,16 +14,32 @@ latest published version.
 
 | | |
 |---|---|
-| Latest release | **v1.3** ([download](../../releases/latest)) |
-| Version name | 1.3 |
-| Version code | 4 |
+| Latest release | **v1.4** ([download](../../releases/latest)) |
+| Version name | 1.4 |
+| Version code | 5 |
 | Package | `com.keyrecord.app` |
 | Release date | 2026-10-23 |
-| APK | `app-release.apk` (~4.7 MB) |
+| APK | `app-release.apk` (~5.0 MB) |
 | Min / target SDK | 24 / 36 |
 | Permissions | none (except an AndroidX-generated local broadcast permission) |
 
 ### Changelog
+
+**v1.4** (2026-10-23)
+
+- **Chinese pinyin input** — the built-in keyboard now handles 中文拼音 with a
+  real offline engine (dictionaries derived from the pypinyin data plus a corpus
+  frequency table, packaged as local assets, no network).
+- **Candidate bar (联想条)** — an iOS-style suggestion strip above the keys shows
+  the typed pinyin and live candidates: full-phrase matches (e.g. `nihao → 你好`,
+  `women → 我们`) first, then single-character candidates for the first syllable,
+  ordered by real usage frequency.
+- **Long-press symbols** — hold a key to reveal alternate characters (accented
+  letters like áàâä for `a`, and `…•` for `.`, `、` for `,`, `€£¥¢` for `$`,
+  etc.), then slide to pick. Matches the iOS long-press popup.
+- **中 / EN switch** — the globe key now toggles between 中文拼音 and English;
+  the space bar label shows the active mode (`拼音` / `ABC`).
+- Same local-only, real-time recording as before.
 
 **v1.3** (2026-10-23)
 
@@ -70,6 +86,8 @@ latest published version.
 - **Dashboard** with live status, keystroke/app counters, and recent activity
 - **Logs** screen with search and export
 - **No root**, no network access — all data stays in app-private storage
+- **Built-in iOS-style keyboard** with Chinese pinyin input, a live candidate bar
+  (联想条), and long-press symbol popups; globe key switches 中文 / English
 - Service is enabled manually in system Accessibility settings
 
 ## Tech

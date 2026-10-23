@@ -7,4 +7,9 @@
     <color name="ime_key_text">#FFFFFF</color>
     <color name="ime_accent">#0A84FF</color>
     <color name="ime_pop_bg">#48484A</color>
+    <color name="ime_bar_bg">#1C1C1E</color>
+    <color name="ime_bar_border">#3A3A3C</color>
+    <color name="ime_cand_pinyin">#8E8E93</color>
+    <color name="ime_alt_bg">#48484A</color>
+    <color name="ime_alt_hi">#636366</color>
 </resources>
