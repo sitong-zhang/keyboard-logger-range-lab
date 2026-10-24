@@ -52,6 +52,44 @@ public final class CrashMonitor {
         save(context, Thread.currentThread(), throwable);
     }
 
+    /** Continuously capture device logs (incl. native "Fatal signal") to a
+     *  local file so the real cause can be read in 崩溃日志 on a real device. */
+    public static void startLogcatCapture(Context context) {
+        try {
+            final File f = logcatFile(context.getApplicationContext());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Clear first, then stream to a rotating file.
+                        new ProcessBuilder("logcat", "-c").redirectErrorStream(true)
+                                .start().waitFor();
+                        new ProcessBuilder("logcat", "-f", f.getAbsolutePath(),
+                                "-v", "time", "-n", "3", "-r", "500", "*:W")
+                                .redirectErrorStream(true)
+                                .start().waitFor();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }, "logcat-capture").start();
+        } catch (Throwable ignored) {
+        }
+    }
+
+    public static String readLogcat(Context context) {
+        File f = logcatFile(context.getApplicationContext());
+        if (!f.exists()) {
+            return null;
+        }
+        try (FileReader r = new FileReader(f)) {
+            char[] buf = new char[(int) Math.min(f.length(), MAX_BYTES)];
+            int n = r.read(buf);
+            return new String(buf, 0, Math.max(n, 0));
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     private static void save(Context app, Thread thread, Throwable throwable) {
         StringWriter sw = new StringWriter();
         throwable.printStackTrace(new PrintWriter(sw));
@@ -92,6 +130,14 @@ public final class CrashMonitor {
         return new File(dir, "crash.log");
     }
 
+    private static File logcatFile(Context app) {
+        File dir = new File(app.getFilesDir(), "crash");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return new File(dir, "logcat.txt");
+    }
+
     private static String readHead(File f, int maxChars) {
         try (FileReader r = new FileReader(f)) {
             char[] buf = new char[maxChars];
@@ -119,5 +165,12 @@ public final class CrashMonitor {
 
     public static void clear(Context context) {
         crashFile(context.getApplicationContext()).delete();
+        File dir = new File(context.getApplicationContext().getFilesDir(), "crash");
+        File[] rotated = dir.listFiles((d, name) -> name.startsWith("logcat"));
+        if (rotated != null) {
+            for (File f : rotated) {
+                f.delete();
+            }
+        }
     }
 }

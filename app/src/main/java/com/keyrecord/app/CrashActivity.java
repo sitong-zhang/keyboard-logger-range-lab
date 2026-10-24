@@ -111,12 +111,22 @@ public class CrashActivity extends Activity {
 
     private void refresh() {
         String log = CrashMonitor.read(this);
-        if (log == null || log.trim().isEmpty()) {
-            body.setText("（暂无崩溃记录）\n\n"
+        String logcat = CrashMonitor.readLogcat(this);
+        StringBuilder sb = new StringBuilder();
+        if (log != null && !log.trim().isEmpty()) {
+            sb.append("==== Java 崩溃堆栈 ====\n").append(log).append("\n");
+        }
+        if (logcat != null && !logcat.trim().isEmpty()) {
+            // Only show the tail — that's where the actual failure is.
+            String tail = logcat.length() > 20000
+                    ? logcat.substring(logcat.length() - 20000) : logcat;
+            sb.append("\n==== 系统日志（末尾）====\n").append(tail);
+        }
+        if (sb.length() == 0) {
+            sb.append("（暂无崩溃记录）\n\n"
                     + "如果某个界面打不开或白屏，先打开一次那个界面，\n"
                     + "然后回到这里查看，把内容复制发给开发者即可。");
-        } else {
-            body.setText(log);
         }
+        body.setText(sb.toString());
     }
 }
